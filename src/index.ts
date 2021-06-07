@@ -47,24 +47,36 @@ async function validarParametros(request: Request, response: Response, next: Nex
     next();
 }
 
+let globalToken: string = ';'
+
+async function validarToken(request: Request, response: Response, next: NextFunction) {
+    const { token } = request.query;
+
+    if (!token || token !== globalToken) {
+        return response.json({
+            mensagem: 'Token inválido.'
+        }).status(401);
+    }
+    
+    next();
+}
 
 app.post('/login', validarParametros, (request: Request, response: Response) => {
-    const { username, password, nome, idade, turma, cidade } = request.body;
+    const { username, password } = request.body;
 
-    const growdever = {
-        username,
-        password,
-        nome,
-        idade,
-        turma,
-        cidade
-    };
+    if(username === growdevers.username && password === username.password) {
+        globalToken = Math.random().toString(36).substring(2);
 
-    growdevers.push(growdever)
-
-    return response.json(growdever)
+        return response.json({
+            token: globalToken
+        })
+    }    
 });
 
+app.get('/:username/recados', (request: Request, response: Response) => {
+    return response.send('Usuário com acesso')
+});
+// --------
 async function validarUsername(request: Request, response: Response, next: NextFunction) {
     const { username } = request.params;
 
