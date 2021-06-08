@@ -1,8 +1,10 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import axios from 'axios';
 import Growdever from './growdever';
 import Recado from './recado';
+import * as middlewares from './middleware/middlewares';
 
 const app = express();
 
@@ -12,7 +14,7 @@ app.use(cors());
 
 dotenv.config();
 
-const growdevers: any = [
+export const growdevers: any = [
     {
         username: 'pamidoida',
         password: '1234',
@@ -25,34 +27,20 @@ const growdevers: any = [
     }
 ];
 
+export let globalToken: string = ';'
+
 app.get('/growdevers', (request: Request, response: Response) => {
     return response.json(growdevers);
 });
 
-async function validarParametros(request: Request, response: Response, next: NextFunction) {
-    const { username, password } = request.body;
-
-    if(!username || !password) {
-        return response.json({
-            mensagem: 'Dados inválidos!'
-        }).status(400);
-    }
-
-    next();
-}
-
-app.get('/growdevers/:username', [validarParametros, validarUsername],
+app.get('/growdevers/:username', middlewares.validarUsername,
     (request: Request, response: Response) => {
     const { username } = request.params;
 
-    
     return response.json();
 });
 
-
-
-
-app.put('/growdevers/:username', [validarParametros, validarUsername],
+app.put('/growdevers/:username', middlewares.validarUsername,
     (request: Request, response: Response) => {
     const { username } = request.params;
     const { nome, idade, turma, cidade } = request.body;
@@ -76,11 +64,7 @@ app.put('/growdevers/:username', [validarParametros, validarUsername],
     return response.json(growdevers[index]);
 });
 
-
-
-
-
-app.post('/growdevers', validarParametros, (request: Request, response: Response) => {
+app.post('/growdevers', middlewares.validarParametros, (request: Request, response: Response) => {
     const { username, password } = request.body;
 
     if(username === growdevers.username && password === username.password) {
@@ -92,34 +76,7 @@ app.post('/growdevers', validarParametros, (request: Request, response: Response
     }    
 });
 
-let globalToken: string = ';'
-
-async function validarToken(request: Request, response: Response, next: NextFunction) {
-    const { token } = request.query;
-
-    if (!token || token !== globalToken) {
-        return response.json({
-            mensagem: 'Token inválido.'
-        }).status(401);
-    }
-    
-    next();
-}
-
-// --------
-async function validarUsername(request: Request, response: Response, next: NextFunction) {
-    const { username } = request.params;
-
-    if (!username) {
-        return response.json({
-            mensagem: 'Precisamos de um Username para começar =('
-        }).status(400);
-    }
-
-    next();
-}
-
-app.put('/growdevers/:username', [validarParametros, validarUsername],
+app.put('/growdevers/:username', middlewares.validarUsername,
     (request: Request, response: Response) => {
     const { username } = request.params;
     const { nome, idade, turma, cidade } = request.body;
@@ -143,8 +100,7 @@ app.put('/growdevers/:username', [validarParametros, validarUsername],
     return response.json(growdevers[index]);
 });
 
-
-app.get('/growdevers/:username', [validarUsername], (request: Request, response: Response) => {
+app.get('/growdevers/:username', middlewares.validarUsername, (request: Request, response: Response) => {
     const { username } = request.params;
 
     return response.json({
@@ -156,7 +112,7 @@ app.get('/growdevers/:username', [validarUsername], (request: Request, response:
     })
 });
 
-app.delete('/growdevers/:username', (request: Request, response: Response) => {
+app.delete('/growdevers/:username', middlewares.validarUsername, (request: Request, response: Response) => {
     const { username } = request.params;
 
     if (!username) {
@@ -176,19 +132,6 @@ app.delete('/growdevers/:username', (request: Request, response: Response) => {
 app.listen(process.env.PORT || 8080, () => {
     console.log('API rodando... ♥')
 });
-
-
-// addUserBtn.addEventListener('click', function() {
-//     if (password.value !== repeatPassword.value) {
-//         alert('Senhas são diferentes!');
-//     }
-//     for (let item of listaUsuarios) {
-//         if (item.username === usuario.username) {
-//             alert('Usuario já existe');
-//         }
-//     }
-//     growdevers.push(growdever);
-// });
 
 app.get('/:username/recados', (request: Request, response: Response) => {
     return response.send('Usuário com acesso')

@@ -1,5 +1,4 @@
 import Recado from './recado';
-
 export default class Growdever {
     public username: string;
     private password: string;
