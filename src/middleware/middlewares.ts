@@ -12,7 +12,6 @@ export async function validarParametros(request: Request, response: Response, ne
             mensagem: 'Dados inválidos!'
         }).status(400);
     }
-    
 
     next();
 }
@@ -20,9 +19,9 @@ export async function validarParametros(request: Request, response: Response, ne
 export async function encontrarGrowdever(request: Request, response: Response, next: NextFunction) {
     const { username } = request.params;
 
-    const index = growdevers.findIndex((growdever: any) => growdever.username == username)
+    const growdever = growdevers.find((growdever: any) => growdever.username == username)
 
-    if (index < 0) {
+    if (!growdever) {
         return response.json({
             mensagem: 'Growdever não encontrado!'
         }).status(404);
@@ -43,7 +42,6 @@ export async function validarToken(request: Request, response: Response, next: N
     next();
 }
 
-// --------
 export async function validarUsername(request: Request, response: Response, next: NextFunction) {
     const { username } = request.params;
 
@@ -56,3 +54,6 @@ export async function validarUsername(request: Request, response: Response, next
     next();
 }
 
+export async function validarIdRecado(request: Request, response: Response, next: NextFunction) {
+        
+}
